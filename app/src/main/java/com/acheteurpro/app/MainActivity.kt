@@ -25,7 +25,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import java.io.File
-import java.io.FileOutputStream
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import java.text.SimpleDateFormat
@@ -151,8 +150,6 @@ fun BudgetDashboardView() {
 
                 Spacer(modifier = Modifier.height(12.dp))
                 val ratio = ((allocated - available) / allocated).toFloat().coerceIn(0f, 1f)
-                
-                // تم تعديلها لتأخذ قيمة Float مباشرة بدون أقواس تعطل البناء
                 LinearProgressIndicator(
                     progress = ratio,
                     modifier = Modifier.fillMaxWidth().height(8.dp),
@@ -273,39 +270,39 @@ fun generatePurchaseOrderPdf(context: Context): File {
     val canvas: Canvas = page.canvas
     val paint = Paint()
 
-    paint.color = Color.BLACK
-    paint.textSize = 14f
-    paint.isFakeBoldText = true
+    paint.setColor(Color.BLACK)
+    paint.setTextSize(14f)
+    paint.setFakeBoldText(true)
     canvas.drawText("SPA ALGERIA INDUSTRIAL SOLUTIONS", 40f, 50f, paint)
 
-    paint.textSize = 9f
-    paint.isFakeBoldText = false
+    paint.setTextSize(9f)
+    paint.setFakeBoldText(false)
     canvas.drawText("ACHETEUR PRO - Système d'Approvisionnement", 40f, 65f, paint)
 
-    paint.textSize = 14f
-    paint.isFakeBoldText = true
+    paint.setTextSize(14f)
+    paint.setFakeBoldText(true)
     canvas.drawText("BON DE COMMANDE : BC-2026-0042", 300f, 50f, paint)
 
-    paint.textSize = 9f
-    paint.isFakeBoldText = false
+    paint.setTextSize(9f)
+    paint.setFakeBoldText(false)
     val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.FRANCE)
     canvas.drawText("Date : ${sdf.format(Date())}", 300f, 65f, paint)
     canvas.drawText("Fournisseur : SARL COMPTOIR DU SUD", 300f, 80f, paint)
     canvas.drawText("NIF : 000830012987654 | AI : 30019876543", 300f, 95f, paint)
 
     var y = 140f
-    paint.color = Color.LTGRAY
-    paint.style = Paint.Style.FILL
+    paint.setColor(Color.LTGRAY)
+    paint.setStyle(Paint.Style.FILL)
     canvas.drawRect(40f, y - 12f, 555f, y + 5f, paint)
 
-    paint.color = Color.BLACK
-    paint.isFakeBoldText = true
+    paint.setColor(Color.BLACK)
+    paint.setFakeBoldText(true)
     canvas.drawText("Désignation", 45f, y, paint)
     canvas.drawText("Qté", 320f, y, paint)
     canvas.drawText("P.U HT", 400f, y, paint)
     canvas.drawText("Total HT", 480f, y, paint)
 
-    paint.isFakeBoldText = false
+    paint.setFakeBoldText(false)
     val items = listOf(
         OrderItem("Tube Acier 4\" API 5L", 150.0, "M", 15000.0),
         OrderItem("Vanne à boisseau 4\"", 12.0, "U", 50000.0)
@@ -323,7 +320,7 @@ fun generatePurchaseOrderPdf(context: Context): File {
     }
 
     y += 30f
-    paint.isFakeBoldText = true
+    paint.setFakeBoldText(true)
     val tva = totalHt * 0.19
     val ttc = totalHt + tva
     canvas.drawText("Total Général HT : ${String.format(Locale.US, "%.2f DZD", totalHt)}", 320f, y, paint)
@@ -333,10 +330,10 @@ fun generatePurchaseOrderPdf(context: Context): File {
     pdfDocument.finishPage(page)
 
     val outputFile = File(context.cacheDir, "BC-2026-0042.pdf")
-    val fos = FileOutputStream(outputFile)
-    pdfDocument.writeTo(fos)
+    outputFile.outputStream().use { fos ->
+        pdfDocument.writeTo(fos)
+    }
     pdfDocument.close()
-    fos.close()
 
     return outputFile
 }
