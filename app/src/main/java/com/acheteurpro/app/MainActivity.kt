@@ -31,7 +31,6 @@ import java.text.DecimalFormatSymbols
 import java.text.SimpleDateFormat
 import java.util.*
 
-// --- MODÈLES DE DONNÉES ---
 data class OrderItem(
     val description: String,
     val quantity: Double,
@@ -48,7 +47,6 @@ data class InspectionItem(
     var rejectedQty: String = "0"
 )
 
-// --- ACTIVITÉ PRINCIPALE ---
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -94,7 +92,7 @@ class MainActivity : ComponentActivity() {
                                 val pdfFile = generatePurchaseOrderPdf(this@MainActivity)
                                 Toast.makeText(
                                     this@MainActivity,
-                                    "PV enregistré (BL: $blNumber) - PDF créé : ${pdfFile.name}",
+                                    "PV enregistré (BL: $blNumber) - PDF : ${pdfFile.name}",
                                     Toast.LENGTH_LONG
                                 ).show()
                             })
@@ -106,7 +104,6 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-// --- ÉCRAN 1 : TABLEAU DE BORD BUDGÉTAIRE ---
 @Composable
 fun BudgetDashboardView() {
     val symbols = DecimalFormatSymbols(Locale.FRENCH).apply {
@@ -145,7 +142,7 @@ fun BudgetDashboardView() {
 
                 BudgetRow("Budget Alloué", formatter.format(allocated), ComposeColor(0xFF0F172A), true)
                 BudgetRow("DA Approuvées", formatter.format(committedDa), ComposeColor(0xFFD97706), false)
-                BudgetRow("BC Engagés (Non Livrés)", formatter.format(committedPo), ComposeColor(0xFF2563EB), false)
+                BudgetRow("BC Engagés", formatter.format(committedPo), ComposeColor(0xFF2563EB), false)
                 BudgetRow("Réceptions (Non Facturées)", formatter.format(receivedUnbilled), ComposeColor(0xFF7C3AED), false)
                 BudgetRow("Factures Rapprochées", formatter.format(invoiced), ComposeColor(0xFF059669), false)
 
@@ -154,8 +151,10 @@ fun BudgetDashboardView() {
 
                 Spacer(modifier = Modifier.height(12.dp))
                 val ratio = ((allocated - available) / allocated).toFloat().coerceIn(0f, 1f)
+                
+                // تم تعديلها لتأخذ قيمة Float مباشرة بدون أقواس تعطل البناء
                 LinearProgressIndicator(
-                    progress = { ratio },
+                    progress = ratio,
                     modifier = Modifier.fillMaxWidth().height(8.dp),
                     color = if (ratio > 0.9f) ComposeColor(0xFFDC2626) else ComposeColor(0xFF0284C7),
                     trackColor = ComposeColor(0xFFE2E8F0)
@@ -176,7 +175,6 @@ fun BudgetRow(label: String, value: String, color: ComposeColor, isBold: Boolean
     }
 }
 
-// --- ÉCRAN 2 : RÉCEPTION & CONTRÔLE CHANTIER ---
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MaterialReceiptView(onGeneratePdf: (String) -> Unit) {
@@ -268,7 +266,6 @@ fun MaterialReceiptView(onGeneratePdf: (String) -> Unit) {
     }
 }
 
-// --- GÉNÉRATEUR OFFICIEL DE BON DE COMMANDE PDF ---
 fun generatePurchaseOrderPdf(context: Context): File {
     val pdfDocument = PdfDocument()
     val pageInfo = PdfDocument.PageInfo.Builder(595, 842, 1).create()
